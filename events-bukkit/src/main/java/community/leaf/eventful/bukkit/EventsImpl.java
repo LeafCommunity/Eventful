@@ -10,6 +10,7 @@ package community.leaf.eventful.bukkit;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Objects;
@@ -42,6 +43,12 @@ final class EventsImpl
         Objects.requireNonNull(event, "event");
         Bukkit.getPluginManager().callEvent(event);
         return event;
+    }
+    
+    @SuppressWarnings("unchecked")
+    static void handle(Listener listener, Event event)
+    {
+        ((EventConsumer<Event>) listener).accept(event);
     }
     
     static final class Builder<E extends Event> implements Events.Builder<E>

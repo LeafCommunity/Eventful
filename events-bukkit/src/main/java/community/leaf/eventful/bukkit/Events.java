@@ -45,12 +45,6 @@ public interface Events extends EventDispatcher
         return listener;
     }
     
-    @SuppressWarnings("unchecked")
-    private static void handle(Listener listener, Event event)
-    {
-        ((EventConsumer<Event>) listener).accept(event);
-    }
-    
     default <E extends Event> void on(Class<E> event, EventPriority priority, boolean ignoredCancelled, EventConsumer<E> listener)
     {
         Objects.requireNonNull(event, "event");
@@ -58,13 +52,13 @@ public interface Events extends EventDispatcher
         Objects.requireNonNull(listener, "listener");
         
         plugin().getServer().getPluginManager().registerEvent(
-            event, listener, priority, Events::handle, plugin(), ignoredCancelled
+            event, listener, priority, EventsImpl::handle, plugin(), ignoredCancelled
         );
     }
     
     default <E extends Event> void on(Class<E> event, EventPriority priority, EventConsumer<E> listener)
     {
-        on(event, priority, true, listener);
+        on(event, priority, false, listener);
     }
     
     default <E extends Event> void on(Class<E> event, EventConsumer<E> listener)
@@ -84,5 +78,21 @@ public interface Events extends EventDispatcher
         Builder<E> ignoreCancelled(boolean ignoreCancelled);
         
         void listener(EventConsumer<E> listener);
+        
+        default Builder<E> first() { return priority(EventPriority.LOWEST); }
+        
+        default Builder<E> early() { return priority(EventPriority.LOW); }
+        
+        default Builder<E> normal() { return priority(EventPriority.NORMAL); }
+        
+        default Builder<E> later() { return priority(EventPriority.HIGH); }
+        
+        default Builder<E> last() { return priority(EventPriority.HIGHEST); }
+        
+        default Builder<E> monitor() { return priority(EventPriority.MONITOR); }
+        
+        default Builder<E> acceptingCancelled() { return ignoreCancelled(false); }
+        
+        default Builder<E> ignoringCancelled() { return ignoreCancelled(true); }
     }
 }

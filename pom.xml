@@ -11,7 +11,6 @@
 
     <name>Eventful</name>
     <inceptionYear>2021</inceptionYear>
-    <url>http://github.com/LeafCommunity/Eventful</url>
     <description>Elegant events.</description>
 
     <licenses>
@@ -31,7 +30,7 @@
     <scm>
         <connection>scm:git:git://github.com/LeafCommunity/Eventful.git</connection>
         <developerConnection>scm:git:ssh://github.com:LeafCommunity/Eventful.git</developerConnection>
-        <url>${project.url}</url>
+        <url>http://github.com/LeafCommunity/Eventful</url>
     </scm>
 
     <issueManagement>
@@ -51,7 +50,7 @@
         <!-- License headers -->
         <license.header.year>${project.inceptionYear}</license.header.year>
         <license.header.owner>RezzedUp</license.header.owner>
-        <license.header.url>${project.url}</license.header.url>
+        <license.header.url>http://github.com/LeafCommunity/Eventful</license.header.url>
 
         <!-- Dependency versions -->
         <versions.minecraft.spigot>1.17-R0.1-SNAPSHOT</versions.minecraft.spigot>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>community.leaf.eventful</groupId>
+        <artifactId>examples</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>events-example-bukkit</artifactId>
+
+    <properties>
+        <shade.relocation>community.leaf.examples.eventful.bukkit.shaded</shade.relocation>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Spigot API (via spigot-repo) -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${versions.minecraft.spigot}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Eventful Bukkit (via local project) -->
+        <dependency>
+            <groupId>community.leaf.eventful</groupId>
+            <artifactId>events-bukkit</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.name}-v${project.version}</finalName>
+        <plugins>
+            <!-- Shade dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <relocations>
+                        <!-- TextChain -->
+                        <relocation>
+                            <pattern>community.leaf.eventful</pattern>
+                            <shadedPattern>${shade.relocation}.textchain</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <artifactSet>
+                        <!-- Exclude annotations from built jar -->
+                        <excludes>
+                            <exclude>org.jetbrains.kotlin:kotlin-annotations-jvm</exclude>
+                            <exclude>com.google.code.findbugs:jsr305</exclude>
+                            <exclude>pl.tlinkowski.annotation:pl.tlinkowski.annotation.basic</exclude>
+                        </excludes>
+                    </artifactSet>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,4 @@
+main: community.leaf.examples.eventful.bukkit.ExampleEventfulPlugin
+name: ${project.name}
+version: ${revision}
+api-version: 1.13

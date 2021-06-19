@@ -5,4 +5,4 @@
 [![](https://img.shields.io/badge/Java-11-orange)](#java-version "This project targets Java 11")
 [![](https://img.shields.io/badge/View-Javadocs-%234D7A97)](https://javadoc.jitpack.io/community/leaf/eventful/events-parent/latest/javadoc/ "View javadocs")
 
-Register and call Bukkit events.
+Call and register Bukkit events.

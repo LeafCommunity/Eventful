@@ -60,10 +60,10 @@
                 </executions>
                 <configuration>
                     <relocations>
-                        <!-- TextChain -->
+                        <!-- Eventful -->
                         <relocation>
                             <pattern>community.leaf.eventful</pattern>
-                            <shadedPattern>${shade.relocation}.textchain</shadedPattern>
+                            <shadedPattern>${shade.relocation}.eventful</shadedPattern>
                         </relocation>
                     </relocations>
                     <artifactSet>

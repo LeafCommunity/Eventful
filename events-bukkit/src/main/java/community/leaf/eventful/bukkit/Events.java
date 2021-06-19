@@ -8,29 +8,58 @@
 package community.leaf.eventful.bukkit;
 
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
 
+/**
+ * Utilities for calling and registering Bukkit events.
+ */
 @FunctionalInterface
 public interface Events extends EventDispatcher
 {
+    /**
+     * Creates a new {@code Events} instance by
+     * resolving plugin classes on the current call
+     * stack. The first plugin found on the call
+     * stack will be used for event registration.
+     *
+     * <p><b>Note:</b> a stacktrace will be generated
+     * every time this method is invoked, so consider
+     * reusing instances rather than constantly
+     * re-resolving them.</p>
+     *
+     * @return  a new instance that registers events
+     *          with the plugin resolved from the
+     *          current call stack
+     */
     static Events resolve()
     {
         Plugin plugin = EventsImpl.resolvePluginByStackTrace();
         return () -> plugin;
     }
     
+    /**
+     * Static helper for calling Bukkit events.
+     *
+     * @return  a Bukkit event dispatcher
+     */
     static EventDispatcher dispatcher()
     {
         return EventsImpl::dispatch;
     }
     
+    /**
+     * Gets the plugin used for registering events.
+     *
+     * @return  a plugin
+     */
     Plugin plugin();
     
-    @Override
+    @Override // documented in supertype
     default <E extends Event> E call(E event)
     {
         Objects.requireNonNull(event, "event");
@@ -38,6 +67,16 @@ public interface Events extends EventDispatcher
         return event;
     }
     
+    /**
+     * Registers the provided event listener
+     * then returns it.
+     *
+     * @param listener  the event listener
+     * @param <L>       specific listener type
+     *
+     * @return  the registered listener
+     */
+    @SuppressWarnings("UnusedReturnValue")
     default <L extends Listener> L register(L listener)
     {
         Objects.requireNonNull(listener, "listener");
@@ -45,6 +84,17 @@ public interface Events extends EventDispatcher
         return listener;
     }
     
+    /**
+     * Registers the provided event consumer.
+     *
+     * @param event             the event type
+     * @param priority          the priority
+     * @param ignoredCancelled  whether to ignore cancelled events or not
+     * @param listener          the event handler
+     * @param <E>               event type
+     *
+     * @see EventHandler#ignoreCancelled()
+     */
     default <E extends Event> void on(Class<E> event, EventPriority priority, boolean ignoredCancelled, EventConsumer<E> listener)
     {
         Objects.requireNonNull(event, "event");
@@ -56,43 +106,155 @@ public interface Events extends EventDispatcher
         );
     }
     
+    /**
+     * Registers the provided event consumer,
+     * accepting all events whether cancelled or not.
+     *
+     * @param event     the event type
+     * @param priority  the priority
+     * @param listener  the event handler
+     * @param <E>       event type
+     */
     default <E extends Event> void on(Class<E> event, EventPriority priority, EventConsumer<E> listener)
     {
         on(event, priority, false, listener);
     }
     
+    /**
+     * Registers the provided event consumer
+     * at {@code NORMAL} priority, accepting all
+     * events whether cancelled or not.
+     *
+     * @param event     the event type
+     * @param listener  the event handler
+     * @param <E>       event type
+     */
     default <E extends Event> void on(Class<E> event, EventConsumer<E> listener)
     {
         on(event, EventPriority.NORMAL, listener);
     }
     
+    /**
+     * Creates a new event registration builder for
+     * the provided event type.
+     *
+     * @param event     the event type
+     * @param <E>       event type
+     */
     default <E extends Event> Builder<E> on(Class<E> event)
     {
         return new EventsImpl.Builder<>(this, event);
     }
     
+    /**
+     * Event registration builder.
+     *
+     * @param <E>   event type
+     */
     interface Builder<E extends Event>
     {
+        /**
+         * Sets the event priority.
+         *
+         * @param priority  the priority
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         Builder<E> priority(EventPriority priority);
-        
+    
+        /**
+         * Sets whether cancelled events are ignored by
+         * the listener or not.
+         *
+         * @param ignoreCancelled   whether to ignore cancelled events or not
+         *
+         * @return  the builder
+         *          (for method chaining)
+         *
+         * @see EventHandler#ignoreCancelled()
+         */
         Builder<E> ignoreCancelled(boolean ignoreCancelled);
-        
+    
+        /**
+         * Registers the provided listener with the
+         * builder's previously specified settings.
+         *
+         * @param listener  event consumer
+         */
         void listener(EventConsumer<E> listener);
-        
+    
+        /**
+         * Sets the priority to {@link EventPriority#LOWEST},
+         * which gets called first.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> first() { return priority(EventPriority.LOWEST); }
         
+        /**
+         * Sets the priority to {@link EventPriority#LOW},
+         * which gets called earlier than most other priorities.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> early() { return priority(EventPriority.LOW); }
         
+        /**
+         * Sets the priority to {@link EventPriority#NORMAL},
+         * which is the default priority for event listeners.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> normal() { return priority(EventPriority.NORMAL); }
         
+        /**
+         * Sets the priority to {@link EventPriority#HIGH},
+         * which gets called after most other priorities.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> later() { return priority(EventPriority.HIGH); }
         
+        /**
+         * Sets the priority to {@link EventPriority#HIGHEST},
+         * which gets called last.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> last() { return priority(EventPriority.HIGHEST); }
         
+        /**
+         * Sets the priority to {@link EventPriority#MONITOR},
+         * which <i>truly</i> gets called last (because it's meant
+         * to <i>monitor</i> the outcome of previous listeners).
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> monitor() { return priority(EventPriority.MONITOR); }
-        
+    
+        /**
+         * Makes the event listener accept all events,
+         * regardless of its cancellation status.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> acceptingCancelled() { return ignoreCancelled(false); }
-        
+    
+        /**
+         * Makes the event listener ignore events
+         * if they're cancelled.
+         *
+         * @return  the builder
+         *          (for method chaining)
+         */
         default Builder<E> ignoringCancelled() { return ignoreCancelled(true); }
     }
 }

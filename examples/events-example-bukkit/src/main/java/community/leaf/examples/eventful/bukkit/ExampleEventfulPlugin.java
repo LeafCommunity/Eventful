@@ -2,12 +2,15 @@ package community.leaf.examples.eventful.bukkit;
 
 import community.leaf.eventful.bukkit.EventSource;
 import community.leaf.eventful.bukkit.Events;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.tlinkowski.annotation.basic.NullOr;
@@ -27,15 +30,52 @@ public class ExampleEventfulPlugin extends JavaPlugin implements EventSource, Li
             event.getPlayer().sendMessage("You dropped: " + event.getItemDrop().getItemStack().getType());
         });
         
+        events().on(ExampleEvent.class).ignoringCancelled().last().listener(event -> {
+            event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "Have some dessert!");
+        });
+        
         events().register(this);
     }
     
     @Override
     public Plugin plugin() { return this; }
     
-    @EventHandler(ignoreCancelled = true)
-    public void onPlayerJoin(PlayerJoinEvent event)
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
     {
-        event.getPlayer().sendMessage("Welcome back!");
+        if (events().call(new ExampleEvent(sender)).isCancelled())
+        {
+            sender.sendMessage("Result: event was cancelled.");
+        }
+        else
+        {
+            sender.sendMessage("Result: event was not cancelled.");
+        }
+        
+        return true;
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onServeAppetizer(ExampleEvent event)
+    {
+        event.getSender().sendMessage(ChatColor.YELLOW + "Here's an appetizer to get you started.");
+        
+        if (Math.random() < 0.25)
+        {
+            event.getSender().sendMessage(ChatColor.GREEN + "You now feel sick...");
+            event.setCancelled(true);
+        }
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onServeEntree(ExampleEvent event)
+    {
+        event.getSender().sendMessage(ChatColor.BLUE + "Your entrée is served.");
+        
+        if (Math.random() < 0.50)
+        {
+            event.getSender().sendMessage(ChatColor.DARK_GRAY + "You're full!");
+            event.setCancelled(true);
+        }
     }
 }

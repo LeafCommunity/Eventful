@@ -9,8 +9,20 @@ package community.leaf.eventful.bukkit;
 
 import org.bukkit.event.Event;
 
+/**
+ * Calls Bukkit events.
+ */
 @FunctionalInterface
 public interface EventDispatcher
 {
+    /**
+     * Calls the provided event then
+     * immediately returns it.
+     *
+     * @param event     the event to call
+     * @param <E>       event type
+     *
+     * @return      the called event
+     */
     <E extends Event> E call(E event);
 }

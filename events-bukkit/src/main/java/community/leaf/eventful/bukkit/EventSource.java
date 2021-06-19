@@ -9,11 +9,25 @@ package community.leaf.eventful.bukkit;
 
 import org.bukkit.plugin.Plugin;
 
+/**
+ * A source of events.
+ */
 @FunctionalInterface
 public interface EventSource
 {
+    /**
+     * Gets the plugin used for registering events.
+     *
+     * @return  a plugin
+     */
     Plugin plugin();
     
+    /**
+     * Gets utilities for registering and calling
+     * events using this {@link #plugin()}.
+     *
+     * @return  event utilities
+     */
     default Events events()
     {
         return this::plugin;

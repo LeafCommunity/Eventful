@@ -183,61 +183,68 @@ public interface Events extends EventDispatcher
          * @param listener  event consumer
          */
         void listener(EventConsumer<E> listener);
-    
+        
+        default Builder<E> priority(ListenerOrder order) { return priority(order.priority()); }
+        
+        default Builder<E> cancelled(CancellationPolicy policy)
+        {
+            return ignoreCancelled(policy.ignoresCancelledEvents());
+        }
+        
         /**
-         * Sets the priority to {@link EventPriority#LOWEST},
+         * Sets the priority to {@link ListenerOrder#FIRST},
          * which gets called first.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> first() { return priority(EventPriority.LOWEST); }
+        default Builder<E> first() { return priority(ListenerOrder.FIRST); }
         
         /**
-         * Sets the priority to {@link EventPriority#LOW},
+         * Sets the priority to {@link ListenerOrder#EARLY},
          * which gets called earlier than most other priorities.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> early() { return priority(EventPriority.LOW); }
+        default Builder<E> early() { return priority(ListenerOrder.EARLY); }
         
         /**
-         * Sets the priority to {@link EventPriority#NORMAL},
+         * Sets the priority to {@link ListenerOrder#NORMAL},
          * which is the default priority for event listeners.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> normal() { return priority(EventPriority.NORMAL); }
+        default Builder<E> normal() { return priority(ListenerOrder.NORMAL); }
         
         /**
-         * Sets the priority to {@link EventPriority#HIGH},
+         * Sets the priority to {@link ListenerOrder#LATE},
          * which gets called after most other priorities.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> later() { return priority(EventPriority.HIGH); }
+        default Builder<E> late() { return priority(ListenerOrder.LATE); }
         
         /**
-         * Sets the priority to {@link EventPriority#HIGHEST},
+         * Sets the priority to {@link ListenerOrder#LAST},
          * which gets called last.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> last() { return priority(EventPriority.HIGHEST); }
+        default Builder<E> last() { return priority(ListenerOrder.LAST); }
         
         /**
-         * Sets the priority to {@link EventPriority#MONITOR},
+         * Sets the priority to {@link ListenerOrder#MONITOR},
          * which <i>truly</i> gets called last (because it's meant
          * to <i>monitor</i> the outcome of previous listeners).
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> monitor() { return priority(EventPriority.MONITOR); }
+        default Builder<E> monitor() { return priority(ListenerOrder.MONITOR); }
     
         /**
          * Makes the event listener accept all events,
@@ -246,7 +253,7 @@ public interface Events extends EventDispatcher
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> acceptingCancelled() { return ignoreCancelled(false); }
+        default Builder<E> acceptingCancelled() { return cancelled(CancellationPolicy.ACCEPT); }
     
         /**
          * Makes the event listener ignore events
@@ -255,6 +262,6 @@ public interface Events extends EventDispatcher
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> ignoringCancelled() { return ignoreCancelled(true); }
+        default Builder<E> ignoringCancelled() { return cancelled(CancellationPolicy.IGNORE); }
     }
 }

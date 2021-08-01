@@ -1,8 +1,14 @@
 package community.leaf.examples.eventful.bukkit;
 
 import community.leaf.eventful.bukkit.BukkitEventSource;
+import community.leaf.eventful.bukkit.CancellationPolicy;
 import community.leaf.eventful.bukkit.Events;
+import community.leaf.eventful.bukkit.ListenerOrder;
+import community.leaf.eventful.bukkit.annotations.EventListener;
+import community.leaf.eventful.bukkit.annotations.IfCancelled;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.tlinkowski.annotation.basic.NullOr;
@@ -76,6 +83,19 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
         {
             event.getSender().sendMessage(ChatColor.DARK_GRAY + "You're full!");
             event.setCancelled(true);
+        }
+    }
+    
+    @EventListener(ListenerOrder.FIRST)
+    @IfCancelled(CancellationPolicy.IGNORE)
+    public void onPlayerSneak(PlayerToggleSneakEvent event)
+    {
+        if (event.isSneaking())
+        {
+            event.getPlayer().spigot().sendMessage(
+                ChatMessageType.ACTION_BAR,
+                new ComponentBuilder("Sneaky...").italic(true).color(ChatColor.GRAY).create()
+            );
         }
     }
 }

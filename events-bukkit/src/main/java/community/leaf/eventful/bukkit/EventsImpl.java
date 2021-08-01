@@ -7,6 +7,7 @@
  */
 package community.leaf.eventful.bukkit;
 
+import community.leaf.eventful.bukkit.events.UncaughtEventExceptionEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
@@ -48,7 +49,16 @@ final class EventsImpl
     @SuppressWarnings("unchecked")
     static void handle(Listener listener, Event event)
     {
-        ((EventConsumer<Event>) listener).accept(event);
+        try
+        {
+            ((EventConsumer<Event>) listener).accept(event);
+        }
+        catch (RuntimeException uncaught)
+        {
+            int handlers = UncaughtEventExceptionEvent.getHandlerList().getRegisteredListeners().length;
+            if (handlers <= 0 || event instanceof UncaughtEventExceptionEvent) { throw uncaught; }
+            dispatch(new UncaughtEventExceptionEvent(event, listener, uncaught));
+        }
     }
     
     static final class Builder<E extends Event> implements Events.Builder<E>

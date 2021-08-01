@@ -29,7 +29,7 @@ public class ExampleEvent extends Event implements Cancellable
     @Override
     public void setCancelled(boolean cancelled) { this.cancelled = cancelled; }
     
-    // - - - - - - HanderList Boilerplate - - - - - -
+    // - - - - - - HandlerList Boilerplate - - - - - -
     
     private static final HandlerList HANDLERS = new HandlerList();
     

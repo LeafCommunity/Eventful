@@ -13,7 +13,7 @@ import org.bukkit.plugin.Plugin;
  * A source of events.
  */
 @FunctionalInterface
-public interface EventSource
+public interface BukkitEventSource
 {
     /**
      * Gets the plugin used for registering events.

@@ -17,9 +17,9 @@ public class UncaughtEventExceptionEvent extends Event
 {
     private final Event event;
     private final Listener listener;
-    private final RuntimeException exception;
+    private final Throwable exception;
     
-    public UncaughtEventExceptionEvent(Event event, Listener listener, RuntimeException exception)
+    public UncaughtEventExceptionEvent(Event event, Listener listener, Throwable exception)
     {
         super(Objects.requireNonNull(event, "event").isAsynchronous());
         this.event = event;
@@ -37,7 +37,7 @@ public class UncaughtEventExceptionEvent extends Event
         return listener;
     }
     
-    public RuntimeException getException()
+    public Throwable getException()
     {
         return exception;
     }

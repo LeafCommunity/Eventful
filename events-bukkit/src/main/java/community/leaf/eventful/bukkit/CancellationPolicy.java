@@ -9,18 +9,16 @@ package community.leaf.eventful.bukkit;
 
 public enum CancellationPolicy
 {
-    IGNORE(true),
-    ACCEPT(false);
-    
-    private final boolean ignoreCancelled;
-    
-    CancellationPolicy(boolean ignoreCancelled)
-    {
-        this.ignoreCancelled = ignoreCancelled;
-    }
+    IGNORE,
+    ACCEPT;
     
     public boolean ignoresCancelledEvents()
     {
-        return ignoreCancelled;
+        return this == IGNORE;
+    }
+    
+    public static CancellationPolicy ofIgnoreCancelled(boolean ignoreCancelled)
+    {
+        return (ignoreCancelled) ? IGNORE : ACCEPT;
     }
 }

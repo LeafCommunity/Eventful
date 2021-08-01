@@ -80,7 +80,7 @@ public interface Events extends EventDispatcher
     default <L extends Listener> L register(L listener)
     {
         Objects.requireNonNull(listener, "listener");
-        plugin().getServer().getPluginManager().registerEvents(listener, plugin());
+        EventsImpl.registerMethods(plugin(), listener);
         return listener;
     }
     
@@ -97,13 +97,7 @@ public interface Events extends EventDispatcher
      */
     default <E extends Event> void on(Class<E> event, EventPriority priority, boolean ignoredCancelled, EventConsumer<E> listener)
     {
-        Objects.requireNonNull(event, "event");
-        Objects.requireNonNull(priority, "priority");
-        Objects.requireNonNull(listener, "listener");
-        
-        plugin().getServer().getPluginManager().registerEvent(
-            event, listener, priority, EventsImpl::handle, plugin(), ignoredCancelled
-        );
+        EventsImpl.registerEventConsumer(plugin(), event, priority, ignoredCancelled, listener);
     }
     
     /**
@@ -143,7 +137,7 @@ public interface Events extends EventDispatcher
      */
     default <E extends Event> Builder<E> on(Class<E> event)
     {
-        return new EventsImpl.Builder<>(this, event);
+        return new EventsImpl.Builder<>(plugin(), event);
     }
     
     /**

@@ -21,6 +21,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.tlinkowski.annotation.basic.NullOr;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,7 +63,7 @@ final class EventsImpl
         return event;
     }
     
-    static EventExecutor handle(EventExecutor executor)
+    private static EventExecutor handle(EventExecutor executor)
     {
         return (listener, event) ->
         {
@@ -84,7 +85,7 @@ final class EventsImpl
         };
     }
     
-    static <E extends Event> void registerListener(
+    private static <E extends Event> void registerListener(
         Plugin plugin,
         Class<E> eventType,
         Listener listener,
@@ -130,9 +131,9 @@ final class EventsImpl
         for (Method method : methods) {registerMethod(plugin, listener, method);}
     }
     
-    static void registerMethod(Plugin plugin, Listener listener, Method method)
+    private static void registerMethod(Plugin plugin, Listener listener, Method method)
     {
-        @NullOr ListenerMeta meta = resolveMeta(listener, method);
+        @NullOr EventHandler meta = resolveAnnotation(listener, method);
         if (meta == null) { return; }
         
         @NullOr Class<?> param = (method.getParameterCount() != 1) ? null : method.getParameterTypes()[0];
@@ -149,7 +150,7 @@ final class EventsImpl
         
         method.setAccessible(true);
         
-        registerListener(plugin, eventType, listener, meta.priority, meta.ignoreCancelled, (li, ev) -> {
+        registerListener(plugin, eventType, listener, meta.priority(), meta.ignoreCancelled(), (li, ev) -> {
             if (!eventType.isAssignableFrom(ev.getClass())) { return; }
             try { method.invoke(li, ev); }
             catch (IllegalAccessException | InvocationTargetException e) { throw new EventException(e); }
@@ -157,43 +158,37 @@ final class EventsImpl
     }
     
     @SuppressWarnings("ConstantConditions")
-    static @NullOr ListenerMeta resolveMeta(Listener listener, Method method)
+    private static @NullOr EventHandler resolveAnnotation(Listener listener, Method method)
     {
         @NullOr EventHandler eventHandler = method.getAnnotation(EventHandler.class);
-        if (eventHandler != null)
-        {
-            return new ListenerMeta(eventHandler.priority(), eventHandler.ignoreCancelled());
-        }
+        if (eventHandler != null) { return eventHandler; }
         
         @NullOr EventListener eventListener = method.getAnnotation(EventListener.class);
         if (eventListener == null) { return null; }
         
         Class<?> clazz = listener.getClass();
-        CancellationPolicy policy = CancellationPolicy.ACCEPT;
+        @NullOr IfCancelled ifCancelled = null;
         
         for (AnnotatedElement annotated : List.of(method, clazz, clazz.getPackage()))
         {
-            @NullOr IfCancelled ifCancelled = annotated.getAnnotation(IfCancelled.class);
-            if (ifCancelled != null)
-            {
-                policy = ifCancelled.value();
-                break;
-            }
+            ifCancelled = annotated.getAnnotation(IfCancelled.class);
+            if (ifCancelled != null) { break; }
         }
         
-        return new ListenerMeta(eventListener.value().priority(), policy.ignoresCancelledEvents());
-    }
-    
-    private static class ListenerMeta
-    {
-        final EventPriority priority;
-        final boolean ignoreCancelled;
+        ListenerOrder order = eventListener.value();
+        CancellationPolicy policy = (ifCancelled != null) ? ifCancelled.value() : CancellationPolicy.ACCEPT;
         
-        ListenerMeta(EventPriority priority, boolean ignoreCancelled)
+        return new EventHandler()
         {
-            this.priority = priority;
-            this.ignoreCancelled = ignoreCancelled;
-        }
+            @Override
+            public Class<? extends Annotation> annotationType() { return EventHandler.class; }
+            
+            @Override
+            public EventPriority priority() { return order.priority(); }
+            
+            @Override
+            public boolean ignoreCancelled() { return policy.ignoresCancelledEvents(); }
+        };
     }
     
     static final class Builder<E extends Event> implements Events.Builder<E>
@@ -211,19 +206,21 @@ final class EventsImpl
         }
         
         @Override
-        public Builder<E> priority(EventPriority priority)
+        public Builder<E> priority(ListenerOrder order)
         {
-            this.priority = Objects.requireNonNull(priority);
+            Objects.requireNonNull(order, "order");
+            this.priority = order.priority();
             return this;
         }
-        
+    
         @Override
-        public Builder<E> ignoreCancelled(boolean ignoreCancelled)
+        public Events.Builder<E> cancelled(CancellationPolicy policy)
         {
-            this.ignoreCancelled = ignoreCancelled;
+            Objects.requireNonNull(policy, "policy");
+            this.ignoreCancelled = policy.ignoresCancelledEvents();
             return this;
         }
-        
+    
         @Override
         public void listener(EventConsumer<E> listener)
         {

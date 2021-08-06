@@ -6,6 +6,7 @@ import community.leaf.eventful.bukkit.Events;
 import community.leaf.eventful.bukkit.ListenerOrder;
 import community.leaf.eventful.bukkit.annotations.EventListener;
 import community.leaf.eventful.bukkit.annotations.IfCancelled;
+import community.leaf.eventful.bukkit.events.UncaughtEventExceptionEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -39,6 +40,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
         
         events().on(ExampleEvent.class).ignoringCancelled().last().listener(event -> {
             event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "Have some dessert!");
+        });
+        
+        events().on(UncaughtEventExceptionEvent.class, event -> {
+            getLogger().warning("Something went wrong in event: " + event.getEventName() + " (" + event + ")");
+            event.getException().printStackTrace();
         });
         
         events().register(this);
@@ -96,6 +102,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
                 ChatMessageType.ACTION_BAR,
                 new ComponentBuilder("Sneaky...").italic(true).color(ChatColor.GRAY).create()
             );
+        }
+        
+        if (Math.random() < 0.10)
+        {
+            throw new RuntimeException("Oopsies");
         }
     }
 }

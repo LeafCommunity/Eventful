@@ -87,17 +87,17 @@ public interface Events extends EventDispatcher
     /**
      * Registers the provided event consumer.
      *
-     * @param event             the event type
-     * @param priority          the priority
-     * @param ignoredCancelled  whether to ignore cancelled events or not
-     * @param listener          the event handler
-     * @param <E>               event type
+     * @param event         the event type
+     * @param order         the priority
+     * @param cancelled     whether to ignore cancelled events or not
+     * @param listener      the event handler
+     * @param <E>           event type
      *
      * @see EventHandler#ignoreCancelled()
      */
-    default <E extends Event> void on(Class<E> event, EventPriority priority, boolean ignoredCancelled, EventConsumer<E> listener)
+    default <E extends Event> void on(Class<E> event, ListenerOrder order, CancellationPolicy cancelled, EventConsumer<E> listener)
     {
-        EventsImpl.registerEventConsumer(plugin(), event, priority, ignoredCancelled, listener);
+        EventsImpl.registerEventConsumer(plugin(), event, order.priority(), cancelled.ignoresCancelledEvents(), listener);
     }
     
     /**
@@ -105,13 +105,13 @@ public interface Events extends EventDispatcher
      * accepting all events whether cancelled or not.
      *
      * @param event     the event type
-     * @param priority  the priority
+     * @param order     the priority
      * @param listener  the event handler
      * @param <E>       event type
      */
-    default <E extends Event> void on(Class<E> event, EventPriority priority, EventConsumer<E> listener)
+    default <E extends Event> void on(Class<E> event, ListenerOrder order, EventConsumer<E> listener)
     {
-        on(event, priority, false, listener);
+        on(event, order, CancellationPolicy.ACCEPT, listener);
     }
     
     /**
@@ -125,7 +125,7 @@ public interface Events extends EventDispatcher
      */
     default <E extends Event> void on(Class<E> event, EventConsumer<E> listener)
     {
-        on(event, EventPriority.NORMAL, listener);
+        on(event, ListenerOrder.NORMAL, listener);
     }
     
     /**
@@ -150,25 +150,25 @@ public interface Events extends EventDispatcher
         /**
          * Sets the event priority.
          *
-         * @param priority  the priority
+         * @param order     the priority
          *
          * @return  the builder
          *          (for method chaining)
          */
-        Builder<E> priority(EventPriority priority);
+        Builder<E> priority(ListenerOrder order);
     
         /**
          * Sets whether cancelled events are ignored by
          * the listener or not.
          *
-         * @param ignoreCancelled   whether to ignore cancelled events or not
+         * @param policy    the cancellation policy
          *
          * @return  the builder
          *          (for method chaining)
          *
          * @see EventHandler#ignoreCancelled()
          */
-        Builder<E> ignoreCancelled(boolean ignoreCancelled);
+        Builder<E> cancelled(CancellationPolicy policy);
     
         /**
          * Registers the provided listener with the
@@ -177,13 +177,6 @@ public interface Events extends EventDispatcher
          * @param listener  event consumer
          */
         void listener(EventConsumer<E> listener);
-        
-        default Builder<E> priority(ListenerOrder order) { return priority(order.priority()); }
-        
-        default Builder<E> cancelled(CancellationPolicy policy)
-        {
-            return ignoreCancelled(policy.ignoresCancelledEvents());
-        }
         
         /**
          * Sets the priority to {@link ListenerOrder#FIRST},
@@ -242,7 +235,7 @@ public interface Events extends EventDispatcher
     
         /**
          * Makes the event listener accept all events,
-         * regardless of its cancellation status.
+         * regardless of whether they're cancelled or not.
          *
          * @return  the builder
          *          (for method chaining)

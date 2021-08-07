@@ -11,11 +11,13 @@ import community.leaf.eventful.bukkit.annotations.EventListener;
 import community.leaf.eventful.bukkit.annotations.IfCancelled;
 import community.leaf.eventful.bukkit.events.UncaughtEventExceptionEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Warning;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.AuthorNagException;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,9 +29,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,7 +67,7 @@ final class EventsImpl
         return event;
     }
     
-    private static EventExecutor handle(EventExecutor executor)
+    private static EventExecutor handle(ExceptionalExecutor executor)
     {
         return (listener, event) ->
         {
@@ -85,13 +89,13 @@ final class EventsImpl
         };
     }
     
-    private static <E extends Event> void registerListener(
+    private static <E extends Event> void register(
         Plugin plugin,
         Class<E> eventType,
         Listener listener,
         EventPriority priority,
         boolean ignoredCancelled,
-        EventExecutor executor
+        ExceptionalExecutor executor
     ) {
         Objects.requireNonNull(plugin, "plugin");
         Objects.requireNonNull(eventType, "eventType");
@@ -99,9 +103,47 @@ final class EventsImpl
         Objects.requireNonNull(listener, "listener");
         Objects.requireNonNull(executor, "executor");
         
+        checkThenWarnIfDeprecatedEvent(plugin, eventType);
+        
         plugin.getServer().getPluginManager().registerEvent(
             eventType, listener, priority, handle(executor), plugin, ignoredCancelled
         );
+    }
+    
+    @SuppressWarnings("ConstantConditions")
+    private static <A extends Annotation> Optional<A> annotation(AnnotatedElement annotated, Class<A> type)
+    {
+        return Optional.ofNullable(annotated.getAnnotation(type));
+    }
+    
+    private static void checkThenWarnIfDeprecatedEvent(Plugin plugin, Class<? extends Event> eventType)
+    {
+        for (Class<?> clazz = eventType; Event.class.isAssignableFrom(clazz); clazz = clazz.getSuperclass())
+        {
+            if (!clazz.isAnnotationPresent(Deprecated.class)) { continue; }
+    
+            Warning.WarningState warningState = plugin.getServer().getWarningState();
+            Optional<Warning> warning = annotation(clazz, Warning.class);
+            
+            // Differs from bukkit: always print warnings unless explicitly turned off.
+            if (warningState == Warning.WarningState.OFF) { break; }
+            
+            plugin.getLogger().log(
+                Level.WARNING,
+                String.format(
+                    "%s has registered a listener for %s, but the event is deprecated (%s). %s.",
+                    plugin.getDescription().getFullName(),
+                    eventType.getSimpleName(),
+                    clazz.getName(),
+                    warning.map(Warning::reason)
+                        .filter(Predicate.not(String::isBlank))
+                        .orElse("Server performance will be affected")
+                ),
+                (warningState == Warning.WarningState.ON) ? new AuthorNagException(null) : null
+            );
+            
+            return;
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -112,7 +154,7 @@ final class EventsImpl
         boolean ignoredCancelled,
         EventConsumer<E> listener
     ) {
-        registerListener(plugin, eventType, listener, priority, ignoredCancelled, (li, ev) -> {
+        register(plugin, eventType, listener, priority, ignoredCancelled, (li, ev) -> {
             if (eventType.isAssignableFrom(ev.getClass())) { ((EventConsumer<E>) li).accept((E) ev); }
         });
     }
@@ -128,7 +170,23 @@ final class EventsImpl
             Stream.concat(Arrays.stream(clazz.getMethods()), Arrays.stream(clazz.getDeclaredMethods()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         
-        for (Method method : methods) {registerMethod(plugin, listener, method);}
+        for (Method method : methods)
+        {
+            try { registerMethod(plugin, listener, method); }
+            catch (RuntimeException e)
+            {
+                plugin.getLogger().log(
+                    Level.SEVERE,
+                    String.format(
+                        "%s could not register event listener method \"%s\" in %s",
+                        plugin.getDescription().getFullName(),
+                        method.toGenericString(),
+                        listener.getClass()
+                    ),
+                    e
+                );
+            }
+        }
     }
     
     private static void registerMethod(Plugin plugin, Listener listener, Method method)
@@ -141,54 +199,68 @@ final class EventsImpl
         
         if (eventType == null)
         {
-            plugin.getLogger().severe(
-                plugin.getDescription().getFullName() + " attempted to register an invalid event " +
-                "handler (listener) method signature \"" + method.toGenericString() + "\" in " + listener.getClass()
-            );
+            plugin.getLogger().severe(String.format(
+                "%s attempted to register an invalid event listener method signature \"%s\" in %s",
+                plugin.getDescription().getFullName(),
+                method.toGenericString(),
+                listener.getClass()
+            ));
             return;
         }
         
         method.setAccessible(true);
         
-        registerListener(plugin, eventType, listener, meta.priority(), meta.ignoreCancelled(), (li, ev) -> {
+        register(plugin, eventType, listener, meta.priority(), meta.ignoreCancelled(), (li, ev) ->
+        {
             if (!eventType.isAssignableFrom(ev.getClass())) { return; }
+            
             try { method.invoke(li, ev); }
-            catch (IllegalAccessException | InvocationTargetException e) { throw new EventException(e); }
+            // Something went wrong when reflectively calling the method...
+            // fundamentally cannot recover, wrap & throw an EventException
+            catch (IllegalAccessException e) { throw new EventException(e); }
+            // The method threw an exception during execution (simply rethrow the cause)
+            catch (InvocationTargetException e) { throw e.getCause(); }
         });
     }
     
-    @SuppressWarnings("ConstantConditions")
     private static @NullOr EventHandler resolveAnnotation(Listener listener, Method method)
     {
-        @NullOr EventHandler eventHandler = method.getAnnotation(EventHandler.class);
-        if (eventHandler != null) { return eventHandler; }
-        
-        @NullOr EventListener eventListener = method.getAnnotation(EventListener.class);
-        if (eventListener == null) { return null; }
-        
-        Class<?> clazz = listener.getClass();
-        @NullOr IfCancelled ifCancelled = null;
-        
-        for (AnnotatedElement annotated : List.of(method, clazz, clazz.getPackage()))
+        return annotation(method, EventHandler.class).orElseGet(() ->
         {
-            ifCancelled = annotated.getAnnotation(IfCancelled.class);
-            if (ifCancelled != null) { break; }
-        }
-        
-        ListenerOrder order = eventListener.value();
-        CancellationPolicy policy = (ifCancelled != null) ? ifCancelled.value() : CancellationPolicy.ACCEPT;
-        
-        return new EventHandler()
-        {
-            @Override
-            public Class<? extends Annotation> annotationType() { return EventHandler.class; }
+            @NullOr ListenerOrder order =
+                annotation(method, EventListener.class)
+                    .map(EventListener::value)
+                    .orElse(null);
             
-            @Override
-            public EventPriority priority() { return order.priority(); }
+            if (order == null) { return null; }
             
-            @Override
-            public boolean ignoreCancelled() { return policy.ignoresCancelledEvents(); }
-        };
+            Class<?> clazz = listener.getClass();
+            
+            CancellationPolicy policy =
+                Stream.of(method, clazz, clazz.getPackage())
+                    .flatMap(element -> annotation(element, IfCancelled.class).stream())
+                    .map(IfCancelled::value)
+                    .findFirst()
+                    .orElse(CancellationPolicy.ACCEPT);
+            
+            return new EventHandler()
+            {
+                @Override
+                public Class<? extends Annotation> annotationType() { return EventHandler.class; }
+                
+                @Override
+                public EventPriority priority() { return order.priority(); }
+                
+                @Override
+                public boolean ignoreCancelled() { return policy.ignoresCancelledEvents(); }
+            };
+        });
+    }
+    
+    @FunctionalInterface
+    interface ExceptionalExecutor
+    {
+        void execute(Listener listener, Event event) throws Throwable;
     }
     
     static final class Builder<E extends Event> implements Events.Builder<E>

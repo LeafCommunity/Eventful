@@ -13,11 +13,13 @@ import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -42,9 +44,19 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
             event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "Have some dessert!");
         });
         
-        events().on(UncaughtEventExceptionEvent.class, event -> {
-            getLogger().warning("Something went wrong in event: " + event.getEventName() + " (" + event + ")");
+        events().on(UncaughtEventExceptionEvent.class, event ->
+        {
+            Event problem = event.getEvent();
+            
+            getLogger().warning(
+                "Something went wrong in event: " + problem.getEventName() + " (" + problem + ")"
+            );
+            
             event.getException().printStackTrace();
+        });
+        
+        events().on(PlayerPreLoginEvent.class, deprecated -> {
+            getLogger().info(deprecated.getName() + " is joining. . .");
         });
         
         events().register(this);

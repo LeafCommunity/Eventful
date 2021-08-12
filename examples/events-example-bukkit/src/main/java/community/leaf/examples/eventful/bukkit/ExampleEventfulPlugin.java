@@ -5,7 +5,7 @@ import community.leaf.eventful.bukkit.CancellationPolicy;
 import community.leaf.eventful.bukkit.Events;
 import community.leaf.eventful.bukkit.ListenerOrder;
 import community.leaf.eventful.bukkit.annotations.EventListener;
-import community.leaf.eventful.bukkit.annotations.IfCancelled;
+import community.leaf.eventful.bukkit.annotations.CancelledEvents;
 import community.leaf.eventful.bukkit.events.UncaughtEventExceptionEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -115,7 +115,7 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
     }
     
     @EventListener(ListenerOrder.FIRST)
-    @IfCancelled(CancellationPolicy.IGNORE)
+    @CancelledEvents(CancellationPolicy.REJECT)
     public void onPlayerSneak(PlayerToggleSneakEvent event)
     {
         if (event.isSneaking())

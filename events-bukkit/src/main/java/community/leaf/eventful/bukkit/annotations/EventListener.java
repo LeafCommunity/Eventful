@@ -14,9 +14,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Signifies that a method listens for events.
+ * The listener's order (priority) is also defined here,
+ * which is {@link ListenerOrder#NORMAL} by default.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface EventListener
 {
+    /**
+     * Gets the listener's priority.
+     *
+     * @return  the listener order
+     */
     ListenerOrder value() default ListenerOrder.NORMAL;
 }

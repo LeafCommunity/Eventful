@@ -8,7 +8,7 @@
 package community.leaf.eventful.bukkit;
 
 import community.leaf.eventful.bukkit.annotations.EventListener;
-import community.leaf.eventful.bukkit.annotations.IfCancelled;
+import community.leaf.eventful.bukkit.annotations.CancelledEvents;
 import community.leaf.eventful.bukkit.events.UncaughtEventExceptionEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Warning;
@@ -230,8 +230,8 @@ final class EventsImpl
             
             CancellationPolicy policy =
                 Stream.of(method, clazz, clazz.getPackage())
-                    .flatMap(element -> annotation(element, IfCancelled.class).stream())
-                    .map(IfCancelled::value)
+                    .flatMap(element -> annotation(element, CancelledEvents.class).stream())
+                    .map(CancelledEvents::value)
                     .findFirst()
                     .orElse(CancellationPolicy.ACCEPT);
             

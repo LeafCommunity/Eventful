@@ -9,7 +9,6 @@ package community.leaf.eventful.bukkit;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
@@ -249,6 +248,6 @@ public interface Events extends EventDispatcher
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> ignoringCancelled() { return cancelled(CancellationPolicy.IGNORE); }
+        default Builder<E> ignoringCancelled() { return cancelled(CancellationPolicy.REJECT); }
     }
 }

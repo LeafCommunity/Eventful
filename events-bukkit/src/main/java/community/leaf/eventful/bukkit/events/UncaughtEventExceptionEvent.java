@@ -13,12 +13,24 @@ import org.bukkit.event.Listener;
 
 import java.util.Objects;
 
+/**
+ * An event that gets called when an uncaught exception
+ * occurs while handling another event. Use this to customize
+ * event exception handling.
+ */
 public class UncaughtEventExceptionEvent extends Event
 {
     private final Event event;
     private final Listener listener;
     private final Throwable exception;
     
+    /**
+     * Constructs.
+     *
+     * @param event         the exceptional event
+     * @param listener      the listener that caused the exception
+     * @param exception     the uncaught exception
+     */
     public UncaughtEventExceptionEvent(Event event, Listener listener, Throwable exception)
     {
         super(Objects.requireNonNull(event, "event").isAsynchronous());
@@ -27,16 +39,31 @@ public class UncaughtEventExceptionEvent extends Event
         this.exception = Objects.requireNonNull(exception, "exception");
     }
     
+    /**
+     * Gets the event that was being handled.
+     *
+     * @return  the exceptional event
+     */
     public Event getEvent()
     {
         return event;
     }
     
+    /**
+     * Gets the listener the caused the exception.
+     *
+     * @return  the exception-generating listener
+     */
     public Listener getListener()
     {
         return listener;
     }
     
+    /**
+     * Gets the uncaught exception.
+     *
+     * @return  the uncaught exception
+     */
     public Throwable getException()
     {
         return exception;

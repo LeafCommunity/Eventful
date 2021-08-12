@@ -27,7 +27,6 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -75,15 +74,8 @@ final class EventsImpl
     {
         return (listener, event) ->
         {
-            try
-            {
-                executor.execute(listener, event);
-            }
-            catch (Error | EventException error)
-            {
-                // Rethrow errors / existing event exceptions...
-                throw error;
-            }
+            try { executor.execute(listener, event); }
+            catch (Error error) { throw error; } // Rethrow errors
             catch (Throwable uncaught)
             {
                 int handlers = UncaughtEventExceptionEvent.getHandlerList().getRegisteredListeners().length;

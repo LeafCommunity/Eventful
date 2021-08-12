@@ -24,6 +24,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import pl.tlinkowski.annotation.basic.NullOr;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,6 +44,8 @@ final class EventsImpl
     private EventsImpl() { throw new UnsupportedOperationException(); }
     
     private static final String PACKAGE = EventsImpl.class.getPackageName();
+    
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
     
     static JavaPlugin resolvePluginByStackTrace()
     {
@@ -209,17 +213,13 @@ final class EventsImpl
         }
         
         method.setAccessible(true);
+        MethodHandle handle;
         
-        register(plugin, eventType, listener, meta.priority(), meta.ignoreCancelled(), (li, ev) ->
-        {
-            if (!eventType.isAssignableFrom(ev.getClass())) { return; }
-            
-            try { method.invoke(li, ev); }
-            // Something went wrong when reflectively calling the method...
-            // fundamentally cannot recover, wrap & throw an EventException
-            catch (IllegalAccessException e) { throw new EventException(e); }
-            // The method threw an exception during execution (simply rethrow the cause)
-            catch (InvocationTargetException e) { throw e.getCause(); }
+        try { handle = LOOKUP.unreflect(method); }
+        catch (IllegalAccessException e) { throw new RuntimeException(e); }
+        
+        register(plugin, eventType, listener, meta.priority(), meta.ignoreCancelled(), (li, ev) -> {
+            if (eventType.isAssignableFrom(ev.getClass())) { handle.invoke(li, ev); }
         });
     }
     

@@ -25,6 +25,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import pl.tlinkowski.annotation.basic.NullOr;
 
+import java.util.logging.Level;
+
 public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSource, Listener
 {
     @Override
@@ -41,22 +43,30 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
         });
         
         events().on(ExampleEvent.class).ignoringCancelled().last().listener(event -> {
-            event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "Have some dessert!");
+            event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "3: Have some dessert!");
+        });
+        
+        events().on(PlayerPreLoginEvent.class, deprecated -> {
+            getLogger().info(deprecated.getName() + " is joining. . .");
         });
         
         events().on(UncaughtEventExceptionEvent.class, event ->
         {
             Event problem = event.getEvent();
+            Throwable exception = event.getException();
             
-            getLogger().warning(
-                "Something went wrong in event: " + problem.getEventName() + " (" + problem + ")"
+            getLogger().log(
+                Level.SEVERE,
+                "Something went wrong in event: " + problem.getEventName() + " (" + problem + ")",
+                exception
             );
             
-            event.getException().printStackTrace();
-        });
-        
-        events().on(PlayerPreLoginEvent.class, deprecated -> {
-            getLogger().info(deprecated.getName() + " is joining. . .");
+            getServer().getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission("exceptions.notify"))
+                .forEach(p -> p.sendMessage(
+                    "Error: " + ChatColor.RED + "Something went wrong in event: " + problem.getEventName() + "\n" +
+                    ChatColor.DARK_GRAY + exception.getClass().getSimpleName() + ": " + exception.getMessage()
+                ));
         });
         
         events().register(this);
@@ -70,11 +80,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
     {
         if (events().call(new ExampleEvent(sender)).isCancelled())
         {
-            sender.sendMessage("Result: event was cancelled.");
+            sender.sendMessage(ChatColor.DARK_GREEN + "Result: event was cancelled.");
         }
         else
         {
-            sender.sendMessage("Result: event was not cancelled.");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "Result: event was not cancelled.");
         }
         
         return true;
@@ -83,11 +93,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
     @EventHandler(priority = EventPriority.LOWEST)
     public void onServeAppetizer(ExampleEvent event)
     {
-        event.getSender().sendMessage(ChatColor.YELLOW + "Here's an appetizer to get you started.");
+        event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "1: Here's an appetizer to get you started.");
         
         if (Math.random() < 0.25)
         {
-            event.getSender().sendMessage(ChatColor.GREEN + "You now feel sick...");
+            event.getSender().sendMessage(ChatColor.GREEN + "X: You now feel sick...");
             event.setCancelled(true);
         }
     }
@@ -95,11 +105,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
     @EventHandler(ignoreCancelled = true)
     public void onServeEntree(ExampleEvent event)
     {
-        event.getSender().sendMessage(ChatColor.BLUE + "Your entrée is served.");
+        event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "2: Your entrée is served.");
         
         if (Math.random() < 0.50)
         {
-            event.getSender().sendMessage(ChatColor.DARK_GRAY + "You're full!");
+            event.getSender().sendMessage(ChatColor.GREEN + "X: You're full!");
             event.setCancelled(true);
         }
     }
@@ -118,7 +128,7 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
         
         if (Math.random() < 0.10)
         {
-            throw new RuntimeException("Oopsies");
+            throw new RuntimeException("Oopsies (example exception)");
         }
     }
 }

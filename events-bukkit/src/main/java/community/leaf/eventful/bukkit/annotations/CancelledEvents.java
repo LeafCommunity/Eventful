@@ -28,6 +28,8 @@ import java.lang.annotation.Target;
  * {@link org.bukkit.event.EventHandler},
  * then this annotation's policy will have no effect since Bukkit's
  * standard annotation has its own {@code ignoreCancelled} option.
+ *
+ * @see EventListener
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.PACKAGE})

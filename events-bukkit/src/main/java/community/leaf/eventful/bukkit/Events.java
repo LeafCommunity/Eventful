@@ -231,7 +231,7 @@ public interface Events extends EventDispatcher
          *          (for method chaining)
          */
         default Builder<E> monitor() { return priority(ListenerOrder.MONITOR); }
-    
+        
         /**
          * Makes the event listener accept all events,
          * regardless of whether they're cancelled or not.
@@ -239,15 +239,15 @@ public interface Events extends EventDispatcher
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> acceptingCancelled() { return cancelled(CancellationPolicy.ACCEPT); }
-    
+        default Builder<E> acceptCancelled() { return cancelled(CancellationPolicy.ACCEPT); }
+        
         /**
-         * Makes the event listener ignore events
-         * if they're cancelled.
+         * Makes the event listener reject
+         * cancelled events.
          *
          * @return  the builder
          *          (for method chaining)
          */
-        default Builder<E> ignoringCancelled() { return cancelled(CancellationPolicy.REJECT); }
+        default Builder<E> rejectCancelled() { return cancelled(CancellationPolicy.REJECT); }
     }
 }

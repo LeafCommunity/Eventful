@@ -38,11 +38,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
             event.getPlayer().sendMessage("You interacted with: " + block.getType());
         });
         
-        events().on(PlayerDropItemEvent.class).ignoringCancelled().early().listener(event -> {
+        events().on(PlayerDropItemEvent.class).rejectCancelled().early().listener(event -> {
             event.getPlayer().sendMessage("You dropped: " + event.getItemDrop().getItemStack().getType());
         });
         
-        events().on(ExampleEvent.class).ignoringCancelled().last().listener(event -> {
+        events().on(ExampleEvent.class).rejectCancelled().last().listener(event -> {
             event.getSender().sendMessage(ChatColor.LIGHT_PURPLE + "3: Have some dessert!");
         });
         

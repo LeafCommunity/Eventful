@@ -17,6 +17,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPreLoginEvent;
@@ -130,5 +131,11 @@ public class ExampleEventfulPlugin extends JavaPlugin implements BukkitEventSour
         {
             throw new RuntimeException("Oopsies (example exception)");
         }
+    }
+    
+    @EventListener(ListenerOrder.FIRST)
+    public void onPlayerChat(AsyncPlayerChatEvent event)
+    {
+        event.setMessage(event.getMessage().replace("->", "→").replace("<-", "←"));
     }
 }

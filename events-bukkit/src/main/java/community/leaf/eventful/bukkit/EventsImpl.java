@@ -121,24 +121,27 @@ final class EventsImpl
             Warning.WarningState warningState = plugin.getServer().getWarningState();
             Optional<Warning> warning = annotation(clazz, Warning.class);
             
-            // Differs from bukkit: always print warnings unless explicitly turned off.
-            if (warningState == Warning.WarningState.OFF) { break; }
+            boolean shouldBeWarned = warning.filter(Warning::value).isPresent();
+            boolean canBeWarned = warningState != Warning.WarningState.OFF;
             
-            plugin.getLogger().log(
-                Level.WARNING,
-                String.format(
-                    "%s has registered a listener for %s, but the event is deprecated (%s). %s.",
-                    plugin.getDescription().getFullName(),
-                    eventType.getSimpleName(),
-                    clazz.getName(),
-                    warning.map(Warning::reason)
-                        .filter(Predicate.not(String::isBlank))
-                        .orElse("Server performance will be affected")
-                ),
-                (warningState == Warning.WarningState.ON) ? new AuthorNagException(null) : null
-            );
-            
-            return;
+            if (shouldBeWarned && canBeWarned)
+            {
+                plugin.getLogger().log(
+                    Level.WARNING,
+                    String.format(
+                        "%s has registered a listener for %s, but the event is deprecated (%s). %s.",
+                        plugin.getDescription().getFullName(),
+                        eventType.getSimpleName(),
+                        clazz.getName(),
+                        warning.map(Warning::reason)
+                            .filter(Predicate.not(String::isBlank))
+                            .orElse("Server performance will be affected")
+                    ),
+                    (warningState == Warning.WarningState.ON) ? new AuthorNagException(null) : null
+                );
+                
+                return; // already warned, don't spam
+            }
         }
     }
     

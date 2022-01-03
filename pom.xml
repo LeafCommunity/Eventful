@@ -1,235 +1,237 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>community.leaf.eventful</groupId>
-    <artifactId>events-parent</artifactId>
-    <packaging>pom</packaging>
-    <version>${revision}</version> <!-- Change the version number in .mvn/maven.config -->
+  <groupId>community.leaf.eventful</groupId>
+  <artifactId>events-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>${revision}</version> <!-- Change the version number in .mvn/maven.config -->
 
-    <name>Eventful</name>
-    <inceptionYear>2021</inceptionYear>
-    <description>Elegant events.</description>
+  <name>Eventful</name>
+  <inceptionYear>2021</inceptionYear>
+  <description>Elegant events.</description>
 
-    <licenses>
-        <license>
-            <name>Mozilla Public License Version 2.0</name>
-            <url>http://mozilla.org/MPL/2.0</url>
-        </license>
-    </licenses>
+  <licenses>
+    <license>
+      <name>Mozilla Public License Version 2.0</name>
+      <url>http://mozilla.org/MPL/2.0</url>
+    </license>
+  </licenses>
 
-    <developers>
-        <developer>
-            <name>RezzedUp</name>
-            <url>https://github.com/RezzedUp</url>
-        </developer>
-    </developers>
+  <developers>
+    <developer>
+      <name>RezzedUp</name>
+      <url>https://github.com/RezzedUp</url>
+    </developer>
+  </developers>
 
-    <scm>
-        <connection>scm:git:git://github.com/LeafCommunity/Eventful.git</connection>
-        <developerConnection>scm:git:ssh://github.com:LeafCommunity/Eventful.git</developerConnection>
-        <url>http://github.com/LeafCommunity/Eventful</url>
-    </scm>
+  <scm>
+    <connection>scm:git:git://github.com/LeafCommunity/Eventful.git</connection>
+    <developerConnection>scm:git:ssh://github.com:LeafCommunity/Eventful.git</developerConnection>
+    <url>http://github.com/LeafCommunity/Eventful</url>
+  </scm>
 
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/LeafCommunity/Eventful/issues</url>
-    </issueManagement>
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/LeafCommunity/Eventful/issues</url>
+  </issueManagement>
 
-    <modules>
-        <module>events-bukkit</module>
-    </modules>
+  <modules>
+    <module>events-bukkit</module>
+  </modules>
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <!-- License headers -->
-        <license.header.year>${project.inceptionYear}</license.header.year>
-        <license.header.owner>RezzedUp</license.header.owner>
-        <license.header.url>http://github.com/LeafCommunity/Eventful</license.header.url>
+    <!-- License headers -->
+    <license.header.year>${project.inceptionYear}-${maven.build.timestamp}</license.header.year>
+    <license.header.owner>RezzedUp</license.header.owner>
+    <license.header.url>http://github.com/LeafCommunity/Eventful</license.header.url>
 
-        <!-- Dependency versions -->
-        <versions.minecraft.spigot>1.17-R0.1-SNAPSHOT</versions.minecraft.spigot>
-    </properties>
+    <!-- Dependency versions -->
+    <versions.minecraft.spigot>1.17-R0.1-SNAPSHOT</versions.minecraft.spigot>
+  </properties>
 
-    <dependencies>
-        <!-- Nullness Annotations: @NullOr (via maven-central) -->
-        <dependency>
-            <groupId>pl.tlinkowski.annotation</groupId>
-            <artifactId>pl.tlinkowski.annotation.basic</artifactId>
-            <version>0.2.0</version>
-            <!-- Note: scope must be visible to dependent projects otherwise nullness annotations will not work as intended -->
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <!-- Nullness Annotations: @NullOr (via maven-central) -->
+    <dependency>
+      <groupId>pl.tlinkowski.annotation</groupId>
+      <artifactId>pl.tlinkowski.annotation.basic</artifactId>
+      <version>0.2.0</version>
+      <!-- Note: scope must be visible to dependent projects otherwise nullness annotations will not work as intended -->
+    </dependency>
+  </dependencies>
 
-    <build>
-        <defaultGoal>install</defaultGoal>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <!-- Compile project -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <!--
+      Flatten POM versioning so built JARs don't ship
+      with ${revision} properties as their version number.
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.2.2</version>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <flattenMode>oss</flattenMode>
+        </configuration>
+        <executions>
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>flatten-clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Add license headers -->
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>4.1</version>
+        <configuration>
+          <properties>
+            <year>${license.header.year}</year>
+            <owner>${license.header.owner}</owner>
+            <email>${license.header.url}</email>
+          </properties>
+          <licenseSets>
+            <licenseSet>
+              <header>com/mycila/maven/plugin/license/templates/MPL-2.txt</header>
+              <excludes>
+                <exclude>*.md</exclude>
+                <exclude>*.txt</exclude>
+                <exclude>*.xml</exclude>
+                <exclude>*.yml</exclude>
+                <exclude>.run/**</exclude>
+                <exclude>examples/**</exclude>
+                <exclude>src/test/resources/**</exclude>
+                <exclude>src/main/resources/**</exclude>
+              </excludes>
+            </licenseSet>
+          </licenseSets>
+        </configuration>
+      </plugin>
+    </plugins>
+    <resources>
+      <!-- Filter resource files -->
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+  </build>
+
+  <profiles>
+    <!-- Development (activated by default and disabled if JitPack profile is enabled) -->
+    <!-- Example modules only exist in this profile -->
+    <profile>
+      <id>development</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>!env.JITPACK</name>
+        </property>
+      </activation>
+      <modules>
+        <module>examples</module>
+      </modules>
+    </profile>
+    <!-- JitPack (activated with `JITPACK=true` environment variable) -->
+    <profile>
+      <id>jitpack</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+        <property>
+          <name>env.JITPACK</name>
+        </property>
+      </activation>
+      <build>
+        <pluginManagement>
+          <!-- Aggregate javadocs (only here in the parent) -->
+          <plugins>
+            <plugin>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <inherited>false</inherited>
+              <executions>
+                <execution>
+                  <id>aggregate</id>
+                  <goals>
+                    <goal>aggregate-jar</goal>
+                  </goals>
+                  <phase>package</phase>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
         <plugins>
-            <!-- Compile project -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-            <!--
-            Flatten POM versioning so built JARs don't ship
-            with ${revision} properties as their version number.
-            -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.2.2</version>
-                <configuration>
-                    <updatePomFile>true</updatePomFile>
-                    <flattenMode>oss</flattenMode>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>flatten</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>flatten</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>flatten-clean</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!-- Add license header -->
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>4.1</version>
-                <configuration>
-                    <properties>
-                        <year>${license.header.year}</year>
-                        <owner>${license.header.owner}</owner>
-                        <email>${license.header.url}</email>
-                    </properties>
-                    <licenseSets>
-                        <licenseSet>
-                            <header>com/mycila/maven/plugin/license/templates/MPL-2.txt</header>
-                            <excludes>
-                                <exclude>*.md</exclude>
-                                <exclude>*.txt</exclude>
-                                <exclude>*.xml</exclude>
-                                <exclude>*.yml</exclude>
-                                <exclude>.run/**</exclude>
-                                <exclude>examples/**</exclude>
-                                <exclude>src/test/resources/**</exclude>
-                                <exclude>src/main/resources/**</exclude>
-                            </excludes>
-                        </licenseSet>
-                    </licenseSets>
-                </configuration>
-            </plugin>
+          <!-- Generate javadocs -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.2.0</version>
+            <configuration>
+              <doclint>none</doclint>
+              <links>
+                <link>https://javadoc.io/doc/pl.tlinkowski.annotation/pl.tlinkowski.annotation.basic/0.2.0/</link>
+              </links>
+            </configuration>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!-- Attach sources -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.2.0</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
         </plugins>
-        <resources>
-            <!-- Filter resource files -->
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-    </build>
-
-    <profiles>
-        <!-- Development (activated by default and disabled if JitPack profile is enabled) -->
-        <!-- Example modules only exist in this profile -->
-        <profile>
-            <id>development</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-                <property>
-                    <name>!env.JITPACK</name>
-                </property>
-            </activation>
-            <modules>
-                <module>examples</module>
-            </modules>
-        </profile>
-        <!-- JitPack (activated with `JITPACK=true` environment variable) -->
-        <profile>
-            <id>jitpack</id>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-                <property>
-                    <name>env.JITPACK</name>
-                </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <!-- Aggregate javadocs (only here in the parent) -->
-                    <plugins>
-                        <plugin>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <inherited>false</inherited>
-                            <executions>
-                                <execution>
-                                    <id>aggregate</id>
-                                    <goals>
-                                        <goal>aggregate-jar</goal>
-                                    </goals>
-                                    <phase>package</phase>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                <plugins>
-                    <!-- Generate javadocs -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.2.0</version>
-                        <configuration>
-                            <doclint>none</doclint>
-                            <links>
-                                <link>https://javadoc.io/doc/pl.tlinkowski.annotation/pl.tlinkowski.annotation.basic/0.2.0/</link>
-                            </links>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>attach-javadocs</id>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- Attach sources -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.0</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

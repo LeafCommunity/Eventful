@@ -18,15 +18,14 @@ public interface BukkitEventSource
     /**
      * Gets the plugin used for registering events.
      *
-     * @return  a plugin
+     * @return a plugin
      */
     Plugin plugin();
     
     /**
-     * Gets utilities for registering and calling
-     * events using this {@link #plugin()}.
+     * Gets utilities for registering and calling events using this {@link #plugin()}.
      *
-     * @return  event utilities
+     * @return event utilities
      */
     default Events events()
     {

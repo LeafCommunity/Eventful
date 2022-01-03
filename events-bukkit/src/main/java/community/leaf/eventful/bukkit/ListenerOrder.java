@@ -57,9 +57,9 @@ public enum ListenerOrder
     }
     
     /**
-     * Gets the order as Bukkit priority.
+     * Gets the order as Bukkit event priority.
      *
-     * @return  the priority
+     * @return the priority
      */
     public EventPriority priority()
     {
@@ -67,12 +67,11 @@ public enum ListenerOrder
     }
     
     /**
-     * Gets the order equivalent of the provided
-     * Bukkit priority.
+     * Gets the order equivalent of the provided Bukkit event priority.
      *
      * @param priority  the bukkit priority
      *
-     * @return  the corresponding listener order
+     * @return the corresponding listener order
      */
     public static ListenerOrder ofPriority(EventPriority priority)
     {

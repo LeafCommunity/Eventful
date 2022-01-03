@@ -14,8 +14,7 @@ import org.bukkit.event.Listener;
 import java.util.Objects;
 
 /**
- * An event that gets called when an uncaught exception
- * occurs while handling another event. Use this to customize
+ * An event that gets called when an uncaught exception occurs while handling another event. Use this to customize
  * event exception handling.
  */
 public class UncaughtEventExceptionEvent extends Event
@@ -42,7 +41,7 @@ public class UncaughtEventExceptionEvent extends Event
     /**
      * Gets the event that was being handled.
      *
-     * @return  the exceptional event
+     * @return the exceptional event
      */
     public Event getEvent()
     {
@@ -52,7 +51,7 @@ public class UncaughtEventExceptionEvent extends Event
     /**
      * Gets the listener the caused the exception.
      *
-     * @return  the exception-generating listener
+     * @return the exception-generating listener
      */
     public Listener getListener()
     {
@@ -62,7 +61,7 @@ public class UncaughtEventExceptionEvent extends Event
     /**
      * Gets the uncaught exception.
      *
-     * @return  the uncaught exception
+     * @return the uncaught exception
      */
     public Throwable getException()
     {

@@ -16,13 +16,12 @@ import org.bukkit.event.Event;
 public interface EventDispatcher
 {
     /**
-     * Calls the provided event then
-     * immediately returns it.
+     * Calls the provided event then immediately returns it.
      *
      * @param event     the event to call
      * @param <E>       event type
      *
-     * @return      the called event
+     * @return the called event
      */
     <E extends Event> E call(E event);
 }

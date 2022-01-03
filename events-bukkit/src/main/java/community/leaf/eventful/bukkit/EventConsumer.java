@@ -13,8 +13,7 @@ import org.bukkit.event.Listener;
 import java.util.function.Consumer;
 
 /**
- * Consumer extension that only accepts {@link Event}
- * subtypes and is also a valid {@link Listener}.
+ * Consumer extension that only accepts {@link Event} subtypes and is also a valid {@link Listener}.
  *
  * @param <E>   event type
  */

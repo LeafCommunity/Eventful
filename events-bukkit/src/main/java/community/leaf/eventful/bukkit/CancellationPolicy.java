@@ -32,12 +32,11 @@ public enum CancellationPolicy
     }
     
     /**
-     * Gets the policy equivalent of the provided
-     * Bukkit {@code ignoreCancelled} state.
+     * Gets the policy equivalent of the provided Bukkit {@code ignoreCancelled} state.
      *
      * @param ignoreCancelled   whether to ignore cancelled events or not
      *
-     * @return  the corresponding cancellation policy
+     * @return the corresponding cancellation policy
      */
     public static CancellationPolicy ofIgnoreCancelled(boolean ignoreCancelled)
     {

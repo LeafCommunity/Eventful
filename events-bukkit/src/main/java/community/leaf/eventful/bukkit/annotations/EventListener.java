@@ -16,8 +16,7 @@ import java.lang.annotation.Target;
 
 /**
  * Signifies that a method listens for events.
- * The listener's order (priority) is also defined here,
- * which is {@link ListenerOrder#NORMAL} by default.
+ * The listener's order (priority) is also defined here, which is {@link ListenerOrder#NORMAL} by default.
  *
  * @see CancelledEvents
  */
@@ -28,7 +27,7 @@ public @interface EventListener
     /**
      * Gets the listener's priority.
      *
-     * @return  the listener order
+     * @return the listener order
      */
     ListenerOrder value() default ListenerOrder.NORMAL;
 }

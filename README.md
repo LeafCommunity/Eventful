@@ -12,7 +12,7 @@
 [java-version]: # "Java Version: 11"
 [java-version-badge]: https://img.shields.io/badge/Java-11-orange
 
-[latest-javadoc]: https://javadoc.jitpack.io/community/leaf/eventful/eventful-parent/latest/javadoc/ "View latest javadoc"
+[latest-javadoc]: https://javadoc.jitpack.io/community/leaf/eventful/events-parent/latest/javadoc/ "View latest javadoc"
 [javadoc-badge]: https://img.shields.io/badge/dynamic/json?url=https://jitpack.io/api/builds/community.leaf/eventful/latestOk&label=Javadoc&query=$.version&color=%234D7A97
 
 <!-- Header & Badges -->

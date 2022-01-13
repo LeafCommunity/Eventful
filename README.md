@@ -1,9 +1,29 @@
+<!-- Badges Config -->
+
+[jitpack]: https://jitpack.io/#community.leaf/eventful "Get maven artifacts on JitPack"
+[jitpack-version-badge]: https://jitpack.io/v/community.leaf/eventful.svg
+
+[jitpack-downloads]: https://jitpack.io/#community.leaf/eventful "JitPack downloads this month"
+[jitpack-downloads-badge]: https://img.shields.io/badge/dynamic/json?url=https://jitpack.io/api/downloads/community.leaf/eventful&label=Monthly+Downloads&query=$.month&color=ok
+
+[license]: ./LICENSE "Project License: MPL-2.0"
+[license-badge]: https://img.shields.io/badge/License-MPL--2.0-blue
+
+[java-version]: # "Java Version: 11"
+[java-version-badge]: https://img.shields.io/badge/Java-11-orange
+
+[latest-javadoc]: https://javadoc.jitpack.io/community/leaf/eventful/eventful-parent/latest/javadoc/ "View latest javadoc"
+[javadoc-badge]: https://img.shields.io/badge/dynamic/json?url=https://jitpack.io/api/builds/community.leaf/eventful/latestOk&label=Javadoc&query=$.version&color=%234D7A97
+
+<!-- Header & Badges -->
+
 # 🎫 Eventful
 
-[![](https://jitpack.io/v/community.leaf/eventful.svg)](https://jitpack.io/#community.leaf/eventful "Get maven artifacts on JitPack")
-[![](https://img.shields.io/badge/License-MPL--2.0-blue)](./LICENSE "Project license: MPL-2.0")
-[![](https://img.shields.io/badge/Java-11-orange)](#java-version "This project targets Java 11")
-[![](https://img.shields.io/badge/View-Javadocs-%234D7A97)](https://javadoc.jitpack.io/community/leaf/eventful/events-parent/latest/javadoc/ "View javadocs")
+[![][jitpack-version-badge]][jitpack]
+[![][jitpack-downloads-badge]][jitpack-downloads]
+[![][license-badge]][license]
+[![][java-version-badge]][java-version]
+[![][javadoc-badge]][latest-javadoc]
 
 Call and register Bukkit events.
 
@@ -11,18 +31,18 @@ Call and register Bukkit events.
 
 ```xml
 <repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
 </repositories>
 ```
 
 ```xml
 <dependency>
-    <groupId>community.leaf.eventful</groupId>
-    <artifactId>events-bukkit</artifactId>
-    <version><!--release--></version>
+  <groupId>community.leaf.eventful</groupId>
+  <artifactId>events-bukkit</artifactId>
+  <version><!--release--></version>
 </dependency>
 ```
 
